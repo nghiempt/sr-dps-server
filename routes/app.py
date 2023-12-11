@@ -34,19 +34,19 @@ async def get_app_by_category_id(ID: int):
 
     return ResponseObject(True, status_code, status_message, apps_dicts)
 
-@appRouter.get('/app/get-app-data-safety/{URL:path}')
-async def get_app_data_safety(URL: str):
-    preprocess_datasafety = await READ_DATA_SAFETY().scrape_link(URL)
+# @appRouter.get('/app/get-app-data-safety/{URL:path}')
+# async def get_app_data_safety(URL: str):
+#     preprocess_datasafety = await READ_DATA_SAFETY().scrape_link(URL)
     
-    result = READ_DATA_SAFETY().formated_data(preprocess_datasafety)
-    status_code = HTTP_STATUS_CODE.OK
-    status_message = HTTP_STATUS_CODE.responses[status_code]
-    return ResponseObject(True, status_code, status_message, result)
+#     result = READ_DATA_SAFETY().formated_data(preprocess_datasafety)
+#     status_code = HTTP_STATUS_CODE.OK
+#     status_message = HTTP_STATUS_CODE.responses[status_code]
+#     return ResponseObject(True, status_code, status_message, result)
 
-@appRouter.get('/app/get-app-privacy-policy/{URL:path}')
-async def get_app_privacy_policy(URL: str):
-    result = READ_PRIVACY_POLICY().generate_result(URL)
-    status_code = HTTP_STATUS_CODE.OK
-    status_message = HTTP_STATUS_CODE.responses[status_code]
-    data_dict = json.loads(result)
-    return ResponseObject(True, status_code, status_message, data_dict)
+# @appRouter.get('/app/get-app-privacy-policy/{URL:path}')
+# async def get_app_privacy_policy(URL: str):
+#     result = READ_PRIVACY_POLICY().generate_result(URL)
+#     status_code = HTTP_STATUS_CODE.OK
+#     status_message = HTTP_STATUS_CODE.responses[status_code]
+#     data_dict = json.loads(result)
+#     return ResponseObject(True, status_code, status_message, data_dict)
