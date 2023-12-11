@@ -27,7 +27,7 @@ source venv/Scripts/activate
 Install package
 
 ```
-pip install fastapi pymongo uvicorn
+pip install fastapi pymongo uvicorn sqlalchemy python-dotenv pymysql bs4 openai newspaper3k
 ```
 
 Start server
