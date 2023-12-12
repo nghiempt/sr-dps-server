@@ -15,16 +15,14 @@ async def extract_ds_pp(input_csv_path, output_csv_path):
             # preprocess_data_safety = await READ_DATA_SAFETY().scrape_link(row['data_safety_link'])
             # data_safety = json.dumps(READ_DATA_SAFETY().formated_data(preprocess_data_safety))
             privacy_policy = READ_PRIVACY_POLICY().generate_result(row['privacy_policy_link'])
-            new_row = [row['app_id'], "", privacy_policy]
+            new_row = [row['app_id'], privacy_policy]
             new_data.append(new_row)
-            if index == 9:
-                break
 
     with open(output_csv_path, 'w', newline='', encoding='utf-8') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(['app_id', 'app_data_safety', 'app_privacy_policy'])
+        csv_writer.writerow(['app_id', 'app_privacy_policy'])
         csv_writer.writerows(new_data)
 
 input_directory = '../dataset/formated_data/app_test.csv'
-output_file_path = 'dspp.csv'
+output_file_path = 'dspp_2.csv'
 asyncio.run(extract_ds_pp(input_directory, output_file_path))
