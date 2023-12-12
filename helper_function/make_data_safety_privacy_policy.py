@@ -17,6 +17,8 @@ async def extract_ds_pp(input_csv_path, output_csv_path):
             privacy_policy = READ_PRIVACY_POLICY().generate_result(row['privacy_policy_link'])
             new_row = [row['app_id'], "", privacy_policy]
             new_data.append(new_row)
+            if index == 9:
+                break
 
     with open(output_csv_path, 'w', newline='', encoding='utf-8') as csvfile:
         csv_writer = csv.writer(csvfile)

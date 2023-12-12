@@ -30,7 +30,8 @@ async def get_app_by_category_id(ID: int):
         if row['app_data_safety']:
             row['app_data_safety'] = json.loads(row['app_data_safety'])
         if row['app_privacy_policy']:
-            row['app_privacy_policy'] = json.loads(row['app_privacy_policy'])
+            if row['app_privacy_policy'].startswith("{"):     
+                row['app_privacy_policy'] = json.loads(row['app_privacy_policy'])
         if row['label']:
             row['label'] = json.loads(row['label'])
         if row['label_description']:
@@ -42,17 +43,17 @@ async def get_app_by_category_id(ID: int):
 # async def get_app_data_safety(URL: str):
 #     preprocess_datasafety = await READ_DATA_SAFETY().scrape_link(URL)
     
-#     result = READ_DATA_SAFETY().formated_data(preprocess_datasafety)
+#     result = READ_DATA_SAFETY().formated_data_string_only(preprocess_datasafety)
 #     status_code = HTTP_STATUS_CODE.OK
 #     status_message = HTTP_STATUS_CODE.responses[status_code]
 #     return ResponseObject(True, status_code, status_message, result)
 
-@appRouter.get('/app/get-app-privacy-policy/{URL:path}')
-async def get_app_privacy_policy(URL: str):
-    result = READ_PRIVACY_POLICY().generate_result(URL)
-    status_code = HTTP_STATUS_CODE.OK
-    status_message = HTTP_STATUS_CODE.responses[status_code]
-    if result == "No provide sharing information section":
-        return ResponseObject(True, status_code, status_message, result)
-    data_dict = json.loads(result)
-    return ResponseObject(True, status_code, status_message, data_dict)
+# @appRouter.get('/app/get-app-privacy-policy/{URL:path}')
+# async def get_app_privacy_policy(URL: str):
+#     result = READ_PRIVACY_POLICY().generate_result_string_only(URL)
+#     status_code = HTTP_STATUS_CODE.OK
+#     status_message = HTTP_STATUS_CODE.responses[status_code]
+#     if result == "No provide sharing information section":
+#         return ResponseObject(True, status_code, status_message, result)
+#     # data_dict = json.loads(result)
+#     return ResponseObject(True, status_code, status_message, result)

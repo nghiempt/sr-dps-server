@@ -69,7 +69,7 @@ class READ_DATA_SAFETY:
         return text
 
     @staticmethod
-    def formated_data_v1(content):
+    def formated_data_v0(content):
     #     content_data = ''
     #     lines = content.splitlines()
     #     for i in range(len(lines)):
@@ -164,6 +164,53 @@ class READ_DATA_SAFETY:
         return result_json
 
     @staticmethod
+    def formated_data_string_only(content):
+        content_data = ''
+        lines = content.splitlines()
+        for i in range(len(lines)):
+            category = data_section = data_type = purpose = ''
+            if lines[i].startswith(' data-section: No data shared'):
+                data_section = lines[i].replace(' data-section: ', '')
+                content_data += "[Data shared: " + data_section + "] - "
+            elif lines[i].startswith(' data-section: No data collected'):
+                data_section = lines[i].replace(' data-section: ', '')
+                content_data += "[Data collected: " + data_section + "] - "
+            elif lines[i].startswith(' data-section:') and not lines[i].startswith(' data-section: Security practices'):
+                data_section = lines[i].replace(' data-section: ', '')
+                content_data += "[" + data_section + ": "
+                for j in range(i + 1, len(lines)):
+                    if lines[j].startswith('\t category: '):
+                        category = lines[j].replace('\t category: ', '')
+                        content_data = content_data + category + "("
+                        for k in range(j + 1, len(lines)):
+                            if lines[k].startswith('\t\tdata-type: '):
+                                data_type = lines[k].replace('\t\tdata-type: ', '')
+                                content_data = content_data + data_type + " · <"
+                            elif lines[k].startswith('\t\tpurpose: '):
+                                purpose = lines[k].replace('\t\tpurpose: ', '').replace(", ", " - ")
+                                if purpose.endswith(' · Optional'):
+                                    purpose = purpose.replace(" · Optional", "")
+                                    content_data += purpose + "> · Optional, "
+                                else:
+                                    content_data += purpose + ">, "
+                            elif lines[j].startswith('\t category: '):
+                                content_data = content_data[:-2] + "), "
+                                break
+                    elif lines[j].startswith(' data-section:'):
+                        content_data = content_data[:-2] + "] - "
+                        break
+            elif lines[i].startswith(' data-section: Security practices'):
+                data_section = lines[i].replace(' data-section: ', '')
+                content_data += "[" + data_section + ": "
+                for j in range(i + 1, len(lines)):
+                    if lines[j].startswith('\t category: '):
+                        category = lines[j].replace('\t category: ', '')
+                        content_data = content_data + category + ", "
+                content_data = content_data[:-2] + "]"
+        # content_data = content_data[:-2]
+        return content_data
+
+    @staticmethod
     def generate_result(user_url):
         preprocess_datasafety = asyncio.run(
             READ_DATA_SAFETY().scrape_link(user_url))
@@ -196,24 +243,56 @@ class READ_PRIVACY_POLICY:
 
     @staticmethod
     def check_valid_token_prompt(prompt):
-        tokens = prompt.split()
-        print(len(tokens))
-        return len(tokens) <= 9000
+        print(len(prompt))
+        return len(prompt) <= 8000
 
     @staticmethod
     def generate_result(url):
-        article = Article(url)
-        article.download()
-        article.parse()
-        text = READ_PRIVACY_POLICY.remove_empty_lines(article.text)
-        prompt = 'Help me to find 3 things: "Data shared", "Data collected", "Security Practices" in the text below in this json format: {"data_shared" : "a string", "data_collected": "a string", "security_practices" : "a string"} . Please in the answer, just give me the json only:  \n'
-        check_valid_token_prompt = READ_PRIVACY_POLICY.check_valid_token_prompt(
-            prompt + text)
-        if check_valid_token_prompt:
-            response = READ_PRIVACY_POLICY.get_completion(prompt + text)
-            return response
-        else:
-            return "No provide sharing information section"
+        try:
+            article = Article(url)
+            article.download()
+            article.parse()
+            text = READ_PRIVACY_POLICY.remove_empty_lines(article.text)
+            prompt = 'Help me to find the origin text about 3 things: type/purpose of data the app shared with others, type/purpose of data the app collected and Security Practices in the text below in this json format: {"data_shared" : "a string", "data_collected": "a string", "security_practices" : "a string"} . Please in the answer, just give me the json only and in English: \n'
+            check_valid_token_prompt = READ_PRIVACY_POLICY.check_valid_token_prompt(
+                prompt + text)
+            if check_valid_token_prompt:
+                response = READ_PRIVACY_POLICY.get_completion(prompt + text)
+                return response
+            else:
+                return "No provide sharing information section"
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+            return "An error occurred during processing"
+        
+    @staticmethod
+    def generate_result_string_only(url):
+        try:
+            article = Article(url)
+            article.download()
+            article.parse()
+            text = READ_PRIVACY_POLICY.remove_empty_lines(article.text)
+            prompt = 'Help me to find the origin text about 3 things: type/purpose of data the app shared with others, type/purpose of data the app collected and Security Practices in the text below in this json format: {"data_shared" : "a string", "data_collected": "a string", "security_practices" : "a string"} . Please in the answer, just give me the json only and in English: \n'
+            check_valid_token_prompt = READ_PRIVACY_POLICY.check_valid_token_prompt(
+                prompt + text)
+            if check_valid_token_prompt:
+                response = READ_PRIVACY_POLICY.get_completion(prompt + text)
+                if response.startswith("{"):
+                    data_dict = json.loads(response)
+                    data_shared = data_dict["data_shared"]
+                    data_collected = data_dict["data_collected"]
+                    security_practices = data_dict["security_practices"]
+                    formatted_output = f"[Data shared: {data_shared}] - [Data Collected: {data_collected}] - [Security practices: {security_practices}]"
+                    print(formatted_output)
+                    return formatted_output
+                else:
+                    return response
+            else:
+                return "No provide sharing information section"
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+            return "An error occurred during processing"
+
 
 
 class MAKE_PROMPT:

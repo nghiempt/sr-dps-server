@@ -44,7 +44,7 @@ def extract_columns_one_file(input_csv_path, output_csv_path):
 # extract_columns(input_directory, output_file_path)
 
 
-# df = pd.read_csv('app_750.csv')
+df = pd.read_csv('dspp.csv')
 
 # Remove blank
 # df_cleaned = df.dropna(subset=['app_name'])
@@ -63,4 +63,6 @@ def extract_columns_one_file(input_csv_path, output_csv_path):
 # category_mapping = dict(zip(category_df['category'], category_df['id']))
 # app_df['category'] = app_df['category'].map(category_mapping)
 
-# app_df.to_csv('app.csv', index=False)
+df.drop("app_data_safety", axis=1, inplace=True)
+
+df.to_csv('dspp_cleaned.csv', index=False)
