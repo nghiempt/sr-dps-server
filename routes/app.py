@@ -11,7 +11,7 @@ import json
 
 appRouter = APIRouter(prefix="/api/v1")
 
-@appRouter.get('/app/get-app-by-category-id-nghiem/{ID}')
+@appRouter.get('/app/get-app-by-category-id/{ID}')
 async def get_app_by_category_id(ID: int):
     joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True)
     select_statement = select(app, dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(app.c.category_id == ID)
@@ -31,6 +31,10 @@ async def get_app_by_category_id(ID: int):
             row['app_data_safety'] = json.loads(row['app_data_safety'])
         if row['app_privacy_policy']:
             row['app_privacy_policy'] = json.loads(row['app_privacy_policy'])
+        if row['label']:
+            row['label'] = json.loads(row['label'])
+        if row['label_description']:
+            row['label_description'] = json.loads(row['label_description'])
 
     return ResponseObject(True, status_code, status_message, apps_dicts)
 
@@ -43,10 +47,12 @@ async def get_app_by_category_id(ID: int):
 #     status_message = HTTP_STATUS_CODE.responses[status_code]
 #     return ResponseObject(True, status_code, status_message, result)
 
-# @appRouter.get('/app/get-app-privacy-policy/{URL:path}')
-# async def get_app_privacy_policy(URL: str):
-#     result = READ_PRIVACY_POLICY().generate_result(URL)
-#     status_code = HTTP_STATUS_CODE.OK
-#     status_message = HTTP_STATUS_CODE.responses[status_code]
-#     data_dict = json.loads(result)
-#     return ResponseObject(True, status_code, status_message, data_dict)
+@appRouter.get('/app/get-app-privacy-policy/{URL:path}')
+async def get_app_privacy_policy(URL: str):
+    result = READ_PRIVACY_POLICY().generate_result(URL)
+    status_code = HTTP_STATUS_CODE.OK
+    status_message = HTTP_STATUS_CODE.responses[status_code]
+    if result == "No provide sharing information section":
+        return ResponseObject(True, status_code, status_message, result)
+    data_dict = json.loads(result)
+    return ResponseObject(True, status_code, status_message, data_dict)

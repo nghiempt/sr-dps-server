@@ -206,28 +206,12 @@ class READ_PRIVACY_POLICY:
         article.download()
         article.parse()
         text = READ_PRIVACY_POLICY.remove_empty_lines(article.text)
-        prompt = "Help me to find 3 things: 'Data shared', 'Data collected', 'Security Practices' in this text:  \n"
+        prompt = 'Help me to find 3 things: "Data shared", "Data collected", "Security Practices" in the text below in this json format: {"data_shared" : "a string", "data_collected": "a string", "security_practices" : "a string"} . Please in the answer, just give me the json only:  \n'
         check_valid_token_prompt = READ_PRIVACY_POLICY.check_valid_token_prompt(
             prompt + text)
         if check_valid_token_prompt:
             response = READ_PRIVACY_POLICY.get_completion(prompt + text)
-
-            sections = READ_PRIVACY_POLICY.remove_empty_lines(response).split("\n")
-            result = {}
-
-            current_section = None
-            for line in sections:
-                if line.endswith(":"):
-                    current_section = line[:-1].replace(' ', '_').lower()
-                    result[current_section] = ""
-                elif current_section is not None:
-                    result[current_section] += line + " "
-
-            result = {key: value.strip() for key, value in result.items()}
-            result = {key: value.strip() for key, value in result.items()}
-            formatted_json = json.dumps(result, indent=2)
-            formatted_json = json.dumps(json.loads(formatted_json), indent=2)
-            return formatted_json
+            return response
         else:
             return "No provide sharing information section"
 

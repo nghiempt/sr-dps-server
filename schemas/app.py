@@ -16,9 +16,10 @@ class App(BaseModel):
     privacy_policy_link: str
     category_id: int
     label: str
+    label_description: str
     
     def serializeList(list):
-        keys = ['app_id', 'app_package_name', 'app_name', 'app_thumbnail', 'app_description', 'developer', 'date_of_analysis', 'number_of_downloads', 'data_safety_link', 'privacy_policy_link', 'category_id', 'label']
+        keys = ['app_id', 'app_package_name', 'app_name', 'app_thumbnail', 'app_description', 'developer', 'date_of_analysis', 'number_of_downloads', 'data_safety_link', 'privacy_policy_link', 'category_id', 'label', 'label_description']
 
-        result = [dict(zip(keys, values[:12])) for values in list]
+        result = [dict(zip(keys, values[:13])) for values in list]
         return result

@@ -15,5 +15,6 @@ app = Table(
     Column('data_safety_link', Text),
     Column('privacy_policy_link', Text),
     Column('category_id', Integer, ForeignKey('dps_category.category_id')),
-    Column('label', Text)
+    Column('label', Text),
+    Column('label_description', Text)
 )
