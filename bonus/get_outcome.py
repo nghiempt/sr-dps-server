@@ -111,8 +111,8 @@ class READ_DATA_SAFETY:
                     if lines[j].startswith('\t category: '):
                         category = lines[j].replace('\t category: ', '')
                         content_data = content_data + category + ", "
-                content_data = content_data[:-2] + "]"
-        # content_data = content_data[:-2]
+                content_data = content_data[:-2] + "] - "
+        content_data = content_data[:-3]
         return content_data
 
     @staticmethod
@@ -148,7 +148,6 @@ class READ_PRIVACY_POLICY:
 
     @staticmethod
     def check_valid_token_prompt(prompt):
-        print(len(prompt))
         return len(prompt) <= 8000
         
     @staticmethod
@@ -169,7 +168,6 @@ class READ_PRIVACY_POLICY:
                     data_collected = data_dict["data_collected"]
                     security_practices = data_dict["security_practices"]
                     formatted_output = f"[Data shared: {data_shared}] - [Data Collected: {data_collected}] - [Security practices: {security_practices}]"
-                    print(formatted_output)
                     return formatted_output
                 else:
                     return response
@@ -183,25 +181,49 @@ class READ_PRIVACY_POLICY:
 class JSON_MAKER:
 
     @staticmethod
-    def loop_csv(csv_path, step_5, step_6):
-        with open(csv_path, "r", newline="", encoding="utf-8") as csvfile:
+    async def loop_csv(csv_path, step_5, step_6, output_csv_path):
+        with open(csv_path, "r", newline="", encoding="utf-8") as csvfile, \
+            open(output_csv_path, "w", newline="", encoding="utf-8") as outputfile:  # 'w' to overwrite or 'a' to append
+            
             reader = csv.reader(csvfile)
-            next(reader)
+            writer = csv.writer(outputfile)
+
+            # Write the header to the output CSV
+            headers = next(reader)
+            writer.writerow(headers)
+
             for index, row in enumerate(reader):
                 print("\n_____________ Run times " +
-                      row[0] + " <" + row[2] + "> " + "_____________")
-                content_5 = step_5.generate_result(row[8])
+                    row[0] + " <" + row[2] + "> " + "_____________")
+                
+                raw_ds = await step_5.scrape_link(row[8])
+                content_5 = step_5.formated_data_string_only(raw_ds)
                 content_6 = step_6.generate_result_string_only(row[9])
-                print(content_5)
-                print('-------------------------------------------')
-                print(content_6)
+
+                row[headers.index("data_safety_content")] = content_5
+                row[headers.index("privacy_policy_content")] = content_6
+                
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                print("Data Safety: " + content_5)
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                print("Privacy Policy: " + content_6)
+
+                writer.writerow(row)
+                
                 print("~~~~~~~~~~~~~~ Success ~~~~~~~~~~~~~~\n")
 
 
-if __name__ == "__main__":
+
+
+async def main():
     step_5 = READ_DATA_SAFETY()
     step_6 = READ_PRIVACY_POLICY()
 
-    csv_path = "/Users/nghiempt/Observation/sr-dps/sr-dps-server/bonus/test.csv"
+    csv_path = "/Users/nghiempt/Observation/sr-dps/sr-dps-server/bonus/android_app_info_miss.csv"
+    output_csv_path = "/Users/nghiempt/Observation/sr-dps/sr-dps-server/bonus/android_app_info_miss_output.csv"
 
-    JSON_MAKER().loop_csv(csv_path, step_5, step_6)
+    await JSON_MAKER().loop_csv(csv_path, step_5, step_6, output_csv_path)
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
