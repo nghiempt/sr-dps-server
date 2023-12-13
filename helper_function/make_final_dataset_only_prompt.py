@@ -206,8 +206,8 @@ class READ_DATA_SAFETY:
                     if lines[j].startswith('\t category: '):
                         category = lines[j].replace('\t category: ', '')
                         content_data = content_data + category + ", "
-                content_data = content_data[:-2] + "]"
-        # content_data = content_data[:-2]
+                content_data = content_data[:-2] + "] - "
+        content_data = content_data[:-3]
         return content_data
 
     @staticmethod
