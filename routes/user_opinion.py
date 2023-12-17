@@ -54,7 +54,7 @@ async def get_opinion_by_user_id_and_app_id(userid: int, appid: int):
     if not foundOpinion:
         status_code = HTTP_STATUS_CODE.NOT_FOUND
         status_message = HTTP_STATUS_CODE.responses[status_code]
-        return ResponseObject(True, status_code, status_message, 'none')
+        return ResponseObject(True, status_code, status_message, 0)
     
     status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
