@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes._index import appRouter, categoryRouter, userRouter, userOpinionRouter
-app = FastAPI()
+from fastapi.openapi.docs import get_swagger_ui_html
+app = FastAPI(docs_url=None)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -9,6 +10,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/docs", include_in_schema=False)
+async def swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title="Survey Server",
+        swagger_favicon_url="https://srdps.pfamilies.me/logo.jpg"
+    )
+
 app.include_router(appRouter,tags=["App"])
 app.include_router(categoryRouter,tags=["Category"])
 app.include_router(userRouter,tags=["User"])

@@ -11,7 +11,7 @@ import json
 
 appRouter = APIRouter(prefix="/api/v1")
 
-@appRouter.get('/app/get-app-by-category-id/{ID}')
+@appRouter.get('/app/get-by-category-id/{ID}')
 async def get_app_by_category_id(ID: int):
     joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True)
     select_statement = select(app, dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(app.c.category_id == ID)

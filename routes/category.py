@@ -7,7 +7,7 @@ from sqlalchemy import select, func, join
 
 categoryRouter = APIRouter(prefix="/api/v1")
 
-@categoryRouter.get('/category/get-all-category')
+@categoryRouter.get('/category/get-all')
 async def get_all_category():
     query = (
         select(category, func.count().label("total_app"))

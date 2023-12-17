@@ -7,7 +7,7 @@ from typing import List
 
 userOpinionRouter = APIRouter(prefix="/api/v1")
 
-@userOpinionRouter.post('/user-opinion/submit-user-opinion')
+@userOpinionRouter.post('/user-opinion/submit-opinion')
 async def submit_user_opinion(opinions: List[UserOpinion]):
     # user_id = 0
     for opinionInput in opinions:
@@ -46,7 +46,7 @@ async def submit_user_opinion(opinions: List[UserOpinion]):
     status_message = HTTP_STATUS_CODE.responses[status_code]
     return ResponseObject(True, status_code, status_message, 'none')
 
-@userOpinionRouter.get('/user-opinion/get-opinion-by-user-id-and-app-id')
+@userOpinionRouter.get('/user-opinion/get-opinion')
 async def get_opinion_by_user_id_and_app_id(userid: int, appid: int):
     foundOpinion = conn.execute(user_opinion.select()
                 .where((user_opinion.c.user_id == userid) & (user_opinion.c.app_id == appid))).fetchone()
