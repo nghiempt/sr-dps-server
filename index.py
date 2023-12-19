@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes._index import appRouter, categoryRouter, userRouter, userOpinionRouter
+from routes._index import appRouter, categoryRouter, userRouter, userOpinionRouter, infoRouter
 from fastapi.openapi.docs import get_swagger_ui_html
 app = FastAPI(
     docs_url=None,
@@ -27,3 +27,4 @@ app.include_router(appRouter,tags=["App"])
 app.include_router(categoryRouter,tags=["Category"])
 app.include_router(userRouter,tags=["User"])
 app.include_router(userOpinionRouter,tags=["Opinion"])
+app.include_router(infoRouter,tags=["Information"])
