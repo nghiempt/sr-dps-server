@@ -57,12 +57,12 @@ async def get_opinion_by_user_id_and_app_id(userid: int, appid: int, db: Session
 
 @userOpinionRouter.post('/user-opinion/clear-all-score')
 async def clear_all_score_by_user_id_and_category_id(userid: int, categoyid: int, db: Session = Depends(get_db)):
-    subquery = select(app.c.app_id).where(app.c.category_id == 1)
+    subquery = select(app.c.app_id).where(app.c.category_id == categoyid)
     select_query = (
         select(user_opinion)
         .where(
             and_(
-                user_opinion.c.user_id == 1,
+                user_opinion.c.user_id == userid,
                 user_opinion.c.app_id.in_(subquery)
             )
         )
@@ -77,7 +77,7 @@ async def clear_all_score_by_user_id_and_category_id(userid: int, categoyid: int
             delete(user_opinion)
             .where(
                 and_(
-                    user_opinion.c.user_id == 1,
+                    user_opinion.c.user_id == userid,
                     user_opinion.c.app_id.in_(subquery)
                 )
             )
