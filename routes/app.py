@@ -12,10 +12,38 @@ from sqlalchemy.orm import Session
 
 appRouter = APIRouter(prefix="/api/v1")
 
-@appRouter.get('/app/get-by-category-id')
-async def get_app_by_category_id(CategoryID: int, UserID: int, db: Session = Depends(get_db)):
+@appRouter.get('/app/get-by-category-id-and-user-id')
+async def get_app_by_category_id_and_user_id(categoryid: int, userid: int, db: Session = Depends(get_db)):
     joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True).join(user_opinion, app.c.app_id == user_opinion.c.app_id, isouter=True)
-    select_statement = select(app, func.coalesce(user_opinion.c.score, literal_column('0')).label('score'), dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(and_(app.c.category_id == CategoryID, or_(user_opinion.c.user_id == UserID, user_opinion.c.user_id.is_(None))))
+    select_statement = select(app, func.coalesce(user_opinion.c.score, literal_column('0')).label('score'), dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(and_(app.c.category_id == categoryid, or_(user_opinion.c.user_id == userid, user_opinion.c.user_id.is_(None))))
+    apps = db.execute(select_statement).fetchall()
+
+    status_code = HTTP_STATUS_CODE.OK
+    status_message = HTTP_STATUS_CODE.responses[status_code]
+
+    if not apps:
+        status_code = HTTP_STATUS_CODE.NOT_FOUND
+        status_message = HTTP_STATUS_CODE.responses[status_code]
+        return ResponseObject(False,status_code, status_message, "No app found")
+    
+    apps_dicts = [dict(row._mapping) for row in apps]
+    for row in apps_dicts:
+        if row['app_data_safety']:
+            row['app_data_safety'] = json.loads(row['app_data_safety'])
+        if row['app_privacy_policy']:
+            if row['app_privacy_policy'].startswith("{"):     
+                row['app_privacy_policy'] = json.loads(row['app_privacy_policy'])
+        if row['label']:
+            row['label'] = json.loads(row['label'])
+        if row['label_description']:
+            row['label_description'] = json.loads(row['label_description'])
+
+    return ResponseObject(True, status_code, status_message, apps_dicts)
+
+@appRouter.get('/app/get-by-category-id')
+async def get_app_by_category_id(id: int, db: Session = Depends(get_db)):
+    joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True)
+    select_statement = select(app, dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(app.c.category_id == id)
     apps = db.execute(select_statement).fetchall()
 
     status_code = HTTP_STATUS_CODE.OK

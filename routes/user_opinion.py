@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from models._index import user_opinion, user, ResponseObject
+from models._index import user_opinion, user, app, ResponseObject
 # from config.db import conn
 from config.db import get_db
 from schemas._index import UserOpinion
@@ -11,28 +11,20 @@ userOpinionRouter = APIRouter(prefix="/api/v1")
 
 @userOpinionRouter.post('/user-opinion/submit-opinion')
 async def submit_user_opinion(opinions: List[UserOpinion], db: Session = Depends(get_db)):
-    # user_id = 0
     for opinionInput in opinions:
-        # foundUser = conn.execute(user.select()
-        #              .where((user.c.user_name == opinionInput.user_name) & (user.c.user_email == opinionInput.user_email))).fetchone()
-        
-        # if not foundUser:
-        #     result = conn.execute(user.insert().values(
-        #         user_name=opinionInput.user_name,
-        #         user_email=opinionInput.user_email
-        #     ))
-
-        #     user_id = result.lastrowid
-        #     conn.execute(user_opinion.insert().values(
-        #         user_id=user_id,
-        #         app_id=opinionInput.app_id,
-        #         score=opinionInput.score
-        #     ))
-        # else:
             foundOpinion = db.execute(user_opinion.select()
                         .where((user_opinion.c.user_id == opinionInput.user_id) & (user_opinion.c.app_id == opinionInput.app_id))).fetchone()
         
             if not foundOpinion:
+                foundUserID = db.execute(user.select()
+                        .where(user.c.user_id == opinionInput.user_id)).fetchone()
+                foundAppID = db.execute(app.select()
+                        .where(app.c.app_id == opinionInput.app_id)).fetchone()
+                if not foundUserID or not foundAppID:
+                    status_code = HTTP_STATUS_CODE.BAD_REQUEST
+                    status_message = HTTP_STATUS_CODE.responses[status_code]
+                    return ResponseObject(True, status_code, status_message, opinions)
+                
                 db.execute(user_opinion.insert().values(
                     user_id=opinionInput.user_id,
                     app_id=opinionInput.app_id,
@@ -50,7 +42,7 @@ async def submit_user_opinion(opinions: List[UserOpinion], db: Session = Depends
 
 @userOpinionRouter.get('/user-opinion/get-opinion')
 async def get_opinion_by_user_id_and_app_id(userid: int, appid: int, db: Session = Depends(get_db)):
-    foundOpinion = conn.execute(user_opinion.select()
+    foundOpinion = db.execute(user_opinion.select()
                 .where((user_opinion.c.user_id == userid) & (user_opinion.c.app_id == appid))).fetchone()
         
     if not foundOpinion:

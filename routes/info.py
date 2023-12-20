@@ -12,7 +12,7 @@ async def get_project_info():
         "sub_info_2" : "Besides, the application detail page also provides a table to check whether the application violates the information criteria (Incorrect, Incomplete, Inconsistent). Additionally, users have the opportunity to rate their personal opinion of each app based on their experience, by choosing from options such as 'strongly agree', 'agree', 'neutral', and many other options.",
         "info_2" : "The 'Privacy Policy Survey' project brings value to users by providing detailed information and reviews on data security and privacy policies of mobile applications, helping them make the right decisions It is correct and safe to use these applications."
     }
-    status_code = HTTP_STATUS_CODE.CREATED
+    status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
     return ResponseObject(True, status_code, status_message, info)
 
@@ -23,7 +23,7 @@ async def get_project_info():
         "incomplete" : "'Incomplete' implies that the information or data provided is not complete or an important part is missing. 'Incomplete' information can include leaving out important parts, not providing enough information to understand an issue, or not fully meeting a request.",
         "inconsistent" : "'Inconsistent' is when information or data has inconsistencies or contradictions in content. This can happen when pieces of information contradict each other or do not demonstrate consistency in context or logic. 'Inconsistent' information can lead to misunderstandings or conflicts in decisions or actions based on it."
         }
-    status_code = HTTP_STATUS_CODE.CREATED
+    status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
     return ResponseObject(True, status_code, status_message, info)
 
@@ -48,7 +48,7 @@ async def get_project_info():
         ],
         "references" : "Link exception: https://support.google.com/googleplay/answer/11416267?hl=vi&visit_id=638227555913177053-2754724865&p=data-safety&rd=1"
         }
-    status_code = HTTP_STATUS_CODE.CREATED
+    status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
     return ResponseObject(True, status_code, status_message, info)
 
@@ -75,7 +75,7 @@ async def get_project_info():
             "Collect reviews from users about mobile applications."
         ]
         }
-    status_code = HTTP_STATUS_CODE.CREATED
+    status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
     return ResponseObject(True, status_code, status_message, info)
 

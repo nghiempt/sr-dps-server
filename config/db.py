@@ -16,4 +16,5 @@ def get_db():
     try:
         yield db
     finally:
+        # print("*********** DB CLOSED *************")
         db.close()
