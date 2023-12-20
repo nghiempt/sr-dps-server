@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from models._index import user, ResponseObject
 # from config.db import conn
 from config.db import get_db
-from schemas._index import User
+from schemas._index import User, UserSignIn
 import http.client as HTTP_STATUS_CODE
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -11,7 +11,8 @@ from helper_function.send_mail import SEND_MAIL
 userRouter = APIRouter(prefix="/api/v1")
 
 @userRouter.post('/user/sign-in')
-async def sign_in(user_email : str, db: Session = Depends(get_db)):
+async def sign_in(user_sign_in: UserSignIn, db: Session = Depends(get_db)):
+    user_email = user_sign_in.user_email
     foundUser = db.execute(user.select()
                 .where(user.c.user_email == user_email)).fetchone()
     if foundUser:
