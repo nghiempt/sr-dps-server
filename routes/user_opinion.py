@@ -44,7 +44,7 @@ async def submit_user_opinion(opinions: List[UserOpinion]):
     conn.commit()
     status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
-    return ResponseObject(True, status_code, status_message, 'none')
+    return ResponseObject(True, status_code, status_message, opinions)
 
 @userOpinionRouter.get('/user-opinion/get-opinion')
 async def get_opinion_by_user_id_and_app_id(userid: int, appid: int):
