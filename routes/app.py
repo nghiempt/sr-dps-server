@@ -14,8 +14,8 @@ appRouter = APIRouter(prefix="/api/v1")
 
 @appRouter.get('/app/get-by-category-id-and-user-id')
 async def get_app_by_category_id_and_user_id(categoryid: int, userid: int, db: Session = Depends(get_db)):
-    joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True).join(user_opinion, app.c.app_id == user_opinion.c.app_id, isouter=True)
-    select_statement = select(app, func.coalesce(user_opinion.c.score, literal_column('0')).label('score'), dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(and_(app.c.category_id == categoryid, or_(user_opinion.c.user_id == userid, user_opinion.c.user_id.is_(None))))
+    joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True).join(user_opinion, and_(app.c.app_id == user_opinion.c.app_id, user_opinion.c.user_id == userid), isouter=True)
+    select_statement = select(app, func.coalesce(user_opinion.c.score, literal_column('0')).label('score'), dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(app.c.category_id == categoryid)
     apps = db.execute(select_statement).fetchall()
 
     status_code = HTTP_STATUS_CODE.OK
