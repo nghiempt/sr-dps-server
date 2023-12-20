@@ -1,20 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from models._index import app, dspp, user_opinion, ResponseObject
-from config.db import conn
+# from config.db import conn
+from config.db import get_db
 from schemas._index import App
 import http.client as HTTP_STATUS_CODE
 from helper_function.make_final_dataset_only_prompt import READ_DATA_SAFETY
 from helper_function.make_final_dataset_only_prompt import READ_PRIVACY_POLICY
 from sqlalchemy import select, func, literal_column, and_, or_
 import json
+from sqlalchemy.orm import Session
 
 appRouter = APIRouter(prefix="/api/v1")
 
 @appRouter.get('/app/get-by-category-id')
-async def get_app_by_category_id(CategoryID: int, UserID: int):
+async def get_app_by_category_id(CategoryID: int, UserID: int, db: Session = Depends(get_db)):
     joined_query = app.join(dspp, app.c.app_id == dspp.c.app_id, isouter=True).join(user_opinion, app.c.app_id == user_opinion.c.app_id, isouter=True)
     select_statement = select(app, func.coalesce(user_opinion.c.score, literal_column('0')).label('score'), dspp.c.app_data_safety, dspp.c.app_privacy_policy).select_from(joined_query).where(and_(app.c.category_id == CategoryID, or_(user_opinion.c.user_id == UserID, user_opinion.c.user_id.is_(None))))
-    apps = conn.execute(select_statement).fetchall()
+    apps = db.execute(select_statement).fetchall()
 
     status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]

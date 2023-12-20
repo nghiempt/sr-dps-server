@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from models._index import category
-from config.db import conn
 
 class Category(BaseModel):
     category_id: int

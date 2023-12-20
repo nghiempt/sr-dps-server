@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from models._index import app, category
-from config.db import conn
 from datetime import date
 
 class App(BaseModel):
