@@ -6,6 +6,7 @@ from schemas._index import UserOpinion
 import http.client as HTTP_STATUS_CODE
 from typing import List
 from sqlalchemy.orm import Session
+from sqlalchemy import select, delete, and_
 
 userOpinionRouter = APIRouter(prefix="/api/v1")
 
@@ -53,3 +54,38 @@ async def get_opinion_by_user_id_and_app_id(userid: int, appid: int, db: Session
     status_code = HTTP_STATUS_CODE.OK
     status_message = HTTP_STATUS_CODE.responses[status_code]
     return ResponseObject(True, status_code, status_message, foundOpinion.score)
+
+@userOpinionRouter.post('/user-opinion/clear-all-score')
+async def clear_all_score_by_user_id_and_category_id(userid: int, categoyid: int, db: Session = Depends(get_db)):
+    subquery = select(app.c.app_id).where(app.c.category_id == 1)
+    select_query = (
+        select(user_opinion)
+        .where(
+            and_(
+                user_opinion.c.user_id == 1,
+                user_opinion.c.app_id.in_(subquery)
+            )
+        )
+    )
+    list_opinion = db.execute(select_query).fetchall()
+    if not list_opinion:
+        status_code = HTTP_STATUS_CODE.NOT_FOUND
+        status_message = HTTP_STATUS_CODE.responses[status_code]
+        return ResponseObject(True, status_code, status_message, "No opinion found")
+    else:
+        delete_query = (
+            delete(user_opinion)
+            .where(
+                and_(
+                    user_opinion.c.user_id == 1,
+                    user_opinion.c.app_id.in_(subquery)
+                )
+            )
+        )
+        result = db.execute(delete_query)
+        db.commit()
+        
+        status_code = HTTP_STATUS_CODE.OK
+        status_message = HTTP_STATUS_CODE.responses[status_code]
+        return ResponseObject(True, status_code, status_message, "Delete success")
+
