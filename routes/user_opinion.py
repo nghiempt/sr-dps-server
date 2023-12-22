@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
 from models._index import user_opinion, user, app, ResponseObject
 # from config.db import conn
 from config.db import get_db
@@ -7,6 +8,7 @@ import http.client as HTTP_STATUS_CODE
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete, and_
+import pandas as pd
 
 userOpinionRouter = APIRouter(prefix="/api/v1")
 
@@ -88,4 +90,19 @@ async def clear_all_score_by_user_id_and_category_id(userid: int, categoyid: int
         status_code = HTTP_STATUS_CODE.OK
         status_message = HTTP_STATUS_CODE.responses[status_code]
         return ResponseObject(True, status_code, status_message, "Delete success")
+    
+@userOpinionRouter.get("/user-opinion/export-to-excel")
+async def export_to_excel(db: Session = Depends(get_db)):
+        query = db.execute(user_opinion.select())
+        results = query.fetchall()
+
+        # Create a DataFrame from the query results
+        df = pd.DataFrame(results, columns=user_opinion.columns.keys())
+
+        # Export DataFrame to Excel file
+        excel_filename = "exported_table.xlsx"
+        df.to_excel(excel_filename, index=False, engine='openpyxl')
+        file_path = f"./{excel_filename}"
+        return FileResponse(file_path, filename=excel_filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
 
