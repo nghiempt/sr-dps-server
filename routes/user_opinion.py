@@ -31,7 +31,9 @@ async def submit_user_opinion(opinions: List[UserOpinion], db: Session = Depends
                 db.execute(user_opinion.insert().values(
                     user_id=opinionInput.user_id,
                     app_id=opinionInput.app_id,
-                    score=opinionInput.score
+                    score=opinionInput.score,
+                    date=opinionInput.date,
+                    user_note = opinionInput.user_note
                 ))
             else:
                 db.execute(user_opinion.update()
@@ -93,16 +95,23 @@ async def clear_all_score_by_user_id_and_category_id(userid: int, categoyid: int
     
 @userOpinionRouter.get("/user-opinion/export-to-excel")
 async def export_to_excel(db: Session = Depends(get_db)):
-        query = db.execute(user_opinion.select())
-        results = query.fetchall()
+        joined_query = user_opinion.join(user, user.c.user_id == user_opinion.c.user_id).join(app, app.c.app_id == user_opinion.c.app_id)
+        query = select(user.c.user_id, user.c.user_name, user.c.user_email, app.c.app_name, user_opinion.c.score, user_opinion.c.date, user_opinion.c.user_note).select_from(joined_query)
+        results = db.execute(query).fetchall()
+        selected_columns = ['user_id', 'user_name', 'user_email', 'app_name', 'opinion', 'date', 'note']
+        df = pd.DataFrame(results, columns=selected_columns)
+        score_mapping = {
+        1: 'Totally Disagree',
+        2: 'Disagree',
+        3: 'Neutral',
+        4: 'Agree',
+        5: 'Totally Agree'
+        }
 
-        # Create a DataFrame from the query results
-        df = pd.DataFrame(results, columns=user_opinion.columns.keys())
-
-        # Export DataFrame to Excel file
+        df['opinion'] = df['opinion'].map(score_mapping)
         excel_filename = "exported_table.xlsx"
-        df.to_excel(excel_filename, index=False, engine='openpyxl')
-        file_path = f"./{excel_filename}"
+        df.to_excel("./dataset/survey_result/" + excel_filename, index=False, engine='openpyxl')
+        file_path = f"./dataset/survey_result/{excel_filename}"
         return FileResponse(file_path, filename=excel_filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
